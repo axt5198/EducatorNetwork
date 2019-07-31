@@ -22,10 +22,10 @@ contract EducatorNetwork {
         uint price;
         string IPFSlocation;
         mapping(address => bool) tBuyers;
-
     }
     
     string[9] languages = ["mandarin", "english", "spanish", "hindi", "arabic", "russian", "portuguese", "french", "italian"];
+    
     mapping(uint => Video) internal videos;
     uint private videoCount = 0;
     
@@ -61,19 +61,24 @@ contract EducatorNetwork {
         msg.sender.transfer(uint256(msg.value) - uint256(_price));
     }
     
-    modifier alreadyPurchasedVideo(uint _videoId){
+    modifier notPurchasedVideo(uint _videoId){
         require(videos[_videoId].buyers[msg.sender] == false, "You've already purchased this video!");
         _;
     }
+
+    modifier havePurchasedVideo(uint _videoId){
+        require(videos[_videoId].buyers[msg.sender] == true, "You have not purchased the corresponding video");
+        _;
+    }
     
-    modifier alreadyPurchasedTranslation(uint _videoId, string memory _language){
+    modifier notPurchasedTranslation(uint _videoId, string memory _language){
         require(videos[_videoId].translations[_language].tBuyers[msg.sender] == false, "You've already purchased this translation");
         _;
     }
     
     // function addVideo()
     function addVideo(uint _price, string memory _description, string memory _IPFSLocation)
-    public 
+    public
     returns(uint)
     {
         uint _videoId = videoCount++;
@@ -87,16 +92,19 @@ contract EducatorNetwork {
         
         return _videoId;
     }
-
+    
     function getVideo(uint _videoId)
-    public view isExistingVideo(_videoId)
-    returns(address, string memory, uint, string memory)
+    public view
+    isExistingVideo(_videoId)
+    returns(address uploader, string memory description, uint price, string memory IPFSLocation)
     {
         return(videos[_videoId].uploader, videos[_videoId].description, videos[_videoId].price, videos[_videoId].IPFSlocation);
     }
    
     function addTranslation(uint _videoId, uint _price, string memory _language, string memory _IPFSLocation)
-    public isValidLanguage(_language.lower()) isExistingVideo(_videoId)
+    public
+    isValidLanguage(_language.lower())
+    isExistingVideo(_videoId)
     {
         string memory language = _language.lower();
         require(bytes(videos[_videoId].translations[language].IPFSlocation).length == 0, "There's already a translation for that language.");
@@ -108,28 +116,54 @@ contract EducatorNetwork {
     }
     
     function getTranslation(uint _videoId, string memory _language)
-    public view isValidLanguage(_language.lower()) isExistingTranslation(_videoId, _language.lower())
-    returns(address, uint, string memory)
+    public view
+    isValidLanguage(_language.lower())
+    isExistingTranslation(_videoId, _language.lower())
+    returns(address translator, uint price, string memory IPFSLocation)
     {
         string memory language = _language.lower();
         return(videos[_videoId].translations[language].translator, videos[_videoId].translations[language].price, videos[_videoId].translations[language].IPFSlocation);
     }
     
     function purchaseVideo(uint _videoId)
-    public payable isExistingVideo(_videoId) checkValue(_videoId, videos[_videoId].price) alreadyPurchasedVideo(_videoId)
-    returns(string memory)
+    public payable
+    isExistingVideo(_videoId)
+    notPurchasedVideo(_videoId)
+    checkValue(_videoId, videos[_videoId].price)
     {
         videos[_videoId].buyers[msg.sender] = true;
+        videos[_videoId].uploader.transfer(videos[_videoId].price);
         emit LogVideoPurchased(_videoId);
+    }
+
+   function didPurchaseVideo(uint _videoId)
+    public view
+    isExistingVideo(_videoId)
+    returns(bool)
+    {
+        return videos[_videoId].buyers[msg.sender];
     }
     
     function purchaseTranslation(uint _videoId, string memory _language)
-    public payable isExistingVideo(_videoId) isExistingTranslation(_videoId, _language.lower()) 
-    checkValue(_videoId, videos[_videoId].translations[_language.lower()].price) alreadyPurchasedTranslation(_videoId, _language.lower())
+    public payable
+    isExistingVideo(_videoId)
+    havePurchasedVideo(_videoId)
+    isExistingTranslation(_videoId, _language.lower())
+    notPurchasedTranslation(_videoId, _language.lower())
+    checkValue(_videoId, videos[_videoId].translations[_language.lower()].price)
     returns(string memory)
     {
-        videos[_videoId].buyers[msg.sender] = true;
+        videos[_videoId].translations[_language.lower()].tBuyers[msg.sender] = true;
+        videos[_videoId].translations[_language.lower()].translator.transfer(videos[_videoId].translations[_language.lower()].price);
         emit LogTranslationPurchased(_videoId, _language.lower());
     }
-   
+    
+    function didPurchaseTranslation(uint _videoId, string memory _language)
+    public view
+    isExistingVideo(_videoId)
+    isExistingTranslation(_videoId, _language.lower())
+    returns(bool)
+    {
+        return videos[_videoId].translations[_language.lower()].tBuyers[msg.sender];
+    }
 }
