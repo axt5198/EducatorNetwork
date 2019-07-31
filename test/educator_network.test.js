@@ -1,8 +1,4 @@
-//import { AssertionError } from "assert";
-
 let EducatorNetwork = artifacts.require('EducatorNetwork')
-let BN = web3.utils.BN
-
 
 contract('EducatorNetwork', async accounts => {
     let instance 
@@ -16,6 +12,7 @@ contract('EducatorNetwork', async accounts => {
         instance = await EducatorNetwork.new()
     })
 
+    // Test uploading a new video, followed by getting that added video and verifying params
     it("Should store two videos and checking the passed details are correct", async() =>{
         // Add a new video from instructor1
         await instance.addVideo(150, "solidity tutorial", "ipfs.com/video1", {from: instructor1})
@@ -31,7 +28,7 @@ contract('EducatorNetwork', async accounts => {
         assert.equal(result2[0].toString(), instructor2.toString(), "Not uploaded by instructor 2")
         assert.equal(result2[1].toString(), "react tutorial", "Doesn't match description passed")
     })
-
+    
     it("Should not be able to getVideo that does not exist", async() => {
         // Transaction reverts when accessing a video that has not been initialized 
         try{
@@ -42,6 +39,7 @@ contract('EducatorNetwork', async accounts => {
         }
     })
 
+    // Test uploading a translation for existing video
     it("Should add a translation for a specific video", async() =>{
         // Add a new video -- function sets videoId = 0
         await instance.addVideo(150, "solidity tutorial", "ipfs.com/video1", {from: instructor1})
@@ -55,6 +53,7 @@ contract('EducatorNetwork', async accounts => {
         assert.equal(result[2], "ipfs.com/translation1", "Location doesn't match uploaded video") 
     })
 
+    // Test param language against a list of valid languages
     it("Should not be able to addTranslation for invalid language", async() => {
         // Add a new video -- function sets videoId = 0
         await instance.addVideo(150, "solidity tutorial", "ipfs.com/video1", {from: instructor1})
@@ -77,6 +76,7 @@ contract('EducatorNetwork', async accounts => {
         }
     })
     
+    // Test purchase video function and checking that uploader got paid correct amount
     it("Student1 should be able to purchase video uploaded by instructor1", async() =>{
         // Add a new video -- function sets videoId = 0
         await instance.addVideo(150, "solidity tutorial", "ipfs.com/video1", {from: instructor1})
@@ -111,6 +111,7 @@ contract('EducatorNetwork', async accounts => {
         }
     })
 
+    // Test to avoid double paying for a video
     it("Student1 should not have to pay for a video twice", async() => {
         // Add a new video -- function sets videoId = 0
         await instance.addVideo(150, "solidity tutorial", "ipfs.com/video1", {from: instructor1})
@@ -142,6 +143,7 @@ contract('EducatorNetwork', async accounts => {
         assert.equal(result, false, "Student has not purchased this video")
     })
 
+    // Test translation upload for existing video and check translator was paid correct amount
     it("Instructor2 should be able to upload a translation for video uploaded by instructor1", async() =>{
         // Instructor1 adds a new video -- function sets videoId = 0
         await instance.addVideo(150, "solidity tutorial", "ipfs.com/video1", {from: instructor1})
@@ -180,6 +182,7 @@ contract('EducatorNetwork', async accounts => {
         }
     })
 
+    // Verifies person purchasing translation has purchased video
     it("Student1 fails to purchase translation because he hasn't purchase video", async() =>{
         // Add a new video -- function sets videoId = 0
         await instance.addVideo(150, "solidity tutorial", "ipfs.com/video1", {from: instructor1})
@@ -196,6 +199,7 @@ contract('EducatorNetwork', async accounts => {
         }
     })
 
+    // Test purchasing non-existing translation
     it("Student1 fails to purchase translation because there isn't one yet", async() =>{
         // Add a new video -- function sets videoId = 0
         await instance.addVideo(150, "solidity tutorial", "ipfs.com/video1", {from: instructor1})
@@ -215,7 +219,7 @@ contract('EducatorNetwork', async accounts => {
         }
     })
 
-
+    // Test to avoid double paying for a translation
     it("Student1 should not have to pay for a translation twice", async() => {
         // Add a new video -- function sets videoId = 0
         await instance.addVideo(150, "solidity tutorial", "ipfs.com/video1", {from: instructor1})
