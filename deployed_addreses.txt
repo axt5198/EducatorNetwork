@@ -1,0 +1,6 @@
+Migrated contracts to rinkeby
+
+contract address: 0xf2ada8f6fae4a7c25f918ac708fb1494ddd4c893
+etherscan: https://rinkeby.etherscan.io/address/0xf2ada8f6fae4a7c25f918ac708fb1494ddd4c893
+
+verified using etherscan's verifyContract
