@@ -68,10 +68,11 @@ contract EducatorNetwork {
     }
     
     // Check msg.value against the price of video/translation. Refunds sender any excess funds after calling method returns
-    modifier checkValue(uint _videoId, uint _price){
+    modifier checkValue(uint _price){
         require(msg.value >= _price, "Not enough funds");
         _;
-        msg.sender.transfer(uint256(msg.value) - uint256(_price));
+        uint amountToRefund = uint256(msg.value) - uint256(_price);
+        msg.sender.transfer(amountToRefund);
     }
     
     // Check msg.sender hasn't previously purchased video to avoid double charging
@@ -174,7 +175,7 @@ contract EducatorNetwork {
     public payable
     isExistingVideo(_videoId)
     notPurchasedVideo(_videoId)
-    checkValue(_videoId, videos[_videoId].price)
+    checkValue(videos[_videoId].price)
     {
         videos[_videoId].buyers[msg.sender] = true;
         videos[_videoId].uploader.transfer(videos[_videoId].price);
@@ -206,7 +207,7 @@ contract EducatorNetwork {
     havePurchasedVideo(_videoId)
     isExistingTranslation(_videoId, _language.lower())
     notPurchasedTranslation(_videoId, _language.lower())
-    checkValue(_videoId, videos[_videoId].translations[_language.lower()].price)
+    checkValue(videos[_videoId].translations[_language.lower()].price)
     {
         videos[_videoId].translations[_language.lower()].tBuyers[msg.sender] = true;
         videos[_videoId].translations[_language.lower()].translator.transfer(videos[_videoId].translations[_language.lower()].price);
