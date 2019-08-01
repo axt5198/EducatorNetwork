@@ -39,7 +39,7 @@ const Account2 = Loadable({
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 const routes = [
-  { path: '/', exact: true, name: 'Home', component: DefaultLayout },
+  { path: '/', exact: true, name: 'Home', component: Homepage },
   { path: '/home', name: 'Homepage', component: Homepage },
   { path: '/account81', name: 'Account', component: Account },
   { path: '/account37', name: 'Account2', component: Account2 },
