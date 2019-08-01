@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import { HashRouter, Route, Switch } from 'react-router-dom';
 import './App.css';
-import EducatorNetworkContract from "../contracts/EducatorNetwork.json"
+import EducatorNetwork from "./contracts/EducatorNetwork.json"
+import getWeb3 from "./utils/getWeb3";
+import ipfs from "./ipfs";
+
 // Styles
 // CoreUI Icons Set
 import '@coreui/icons/css/coreui-icons.min.css';
@@ -39,7 +42,7 @@ class App extends Component {
     // Get network provider and web3 instance.
     // See utils/getWeb3 for more info.
 
-    getWeb3
+    getWeb3()
     .then(results => {
       this.setState({
         web3: results.web3
@@ -62,16 +65,16 @@ class App extends Component {
      */
 
     const contract = require('truffle-contract')
-    const simpleStorage = contract(SimpleStorageContract)
-    simpleStorage.setProvider(this.state.web3.currentProvider)
+    const educatorNetwork = contract(EducatorNetwork)
+    educatorNetwork.setProvider(this.state.web3.currentProvider)
 
     // Get accounts.
     this.state.web3.eth.getAccounts((error, accounts) => {
-      simpleStorage.deployed().then((instance) => {
-        this.simpleStorageInstance = instance
+      educatorNetwork.deployed().then((instance) => {
+        this.educatorNetworkInstance = instance
         this.setState({ account: accounts[0] })
         // Get the value from the contract to prove it worked.
-        return this.simpleStorageInstance.get.call(accounts[0])
+        return this.educatorNetworkInstance.get.call(accounts[0])
       }).then((ipfsHash) => {
         // Update state with the result.
         return this.setState({ ipfsHash })
