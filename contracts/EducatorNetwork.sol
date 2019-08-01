@@ -1,6 +1,6 @@
 pragma solidity ^0.5.0;
 import "../installed_contracts/Strings.sol";
-import "../installed_contracts/zeppelin/contracts/math/SafeMath.sol";
+import "../installed_contracts/SafeMath.sol";
 //import "github.com/OpenZeppelin/openzeppelin-contracts/tree/master/contracts/math";
 
 /**
